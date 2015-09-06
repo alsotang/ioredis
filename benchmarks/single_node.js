@@ -75,6 +75,31 @@ suite('simple get', function() {
   });
 });
 
+suite('large get', function() {
+  set('mintime', 5000);
+  set('concurrency', 300);
+  before(function (start) {
+    ndredis = nodeRedis.createClient();
+    ioredis = new ioRedis();
+    waitReady(function () {
+      ndredis.set('foo', new Array(1000), start);
+    });
+  });
+
+  bench('ioredis', function(next) {
+    ioredis.get('foo', next);
+  });
+
+  bench('node_redis', function(next) {
+    ndredis.get('foo', next);
+  });
+
+  after(function () {
+    ndredis.quit();
+    ioredis.quit();
+  });
+});
+
 suite('simple get with pipeline', function() {
   set('mintime', 5000);
   set('concurrency', 300);
